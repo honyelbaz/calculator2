@@ -2,12 +2,6 @@
 import finder
 #-----------------------------------------------validations--------------------
 
-
-def is_valid(eq):
-    # 
-    pass
-
-
 """make a number """
 
 
@@ -70,6 +64,18 @@ def minuses_haircut(eq):
 
 #----------------------------------------------- list --------------------
 
+#
+def list_is_valid(lst):
+    #the list is not valid if expression and numbers are in a  row with not operators between theme
+    for i in range(len(lst)):
+        if finder.is_number(lst[i]) or finder.is_expression(lst[i]):
+            if i == 0 or i == len(lst) - 1:
+                pass
+            elif finder.is_number(lst[i + 1]) or finder.is_expression(lst[i + 1]):
+                raise Exception("numbers and expressions are one after another with not operator between")
+            elif finder.is_number(lst[i - 1]) or finder.is_expression(lst[i - 1]):
+                raise Exception("numbers and expressions are one after another with not operator between")
+
 
 #
 #makes a list of meaningful members of the string into list (operands, operators, expressions)
@@ -100,6 +106,23 @@ def make_a_list(eq):
     return lst
 
 
+#
+def list_make_operation(lst, i):
+    if not finder.is_operator(lst[i]):
+        raise Exception("not an operator")
+    res = operate(lst, i)
+    op = lst[i]
+    lst[i] = str(res)
+    if finder.is_minus(op) and i == 0:
+        del lst[0 + 1]
+    elif finder.is_middle_operator(op):
+        del lst[i + 1]
+        del lst[i - 1]
+    elif finder.is_right_operator(op):
+        del lst[i - 1]
+    return lst
+
+
 #----------------------------------------------- string manipulations --------------------
 
 
@@ -119,6 +142,95 @@ def split_to_3_strings_by_range(s, start, finish):
     return s1, s2, s3
 
 
-ss = (make_a_list(minuses_haircut("----235-003635235-5334!*---235--235^(--23)--33---")))
-print(ss)
-print(finder.find_strongest_operator(ss))
+#
+#
+def strip_outer_brackets(eq):
+    if not (eq[0] == '(' and eq[len(eq) - 1] == ')'):
+        raise Exception("no brackets to strip")
+    eq = split_to_3_strings_by_range(eq, 1, len(eq) - 2)[1]
+    return eq
+
+
+#
+def needs_to_be_bracket_striped(eq):
+    if eq[0] == '(':
+        closer = finder.find_closer_for_opener(eq, 0)
+        return closer == len(eq) - 1
+    return False
+
+#----------------------------------------------- operations --------------------
+
+
+def factorial(num):
+
+    if num < 0:
+        raise Exception("factorial on negative number is wrong")
+    if num % 1 != 0:
+        raise Exception("factorial on none complete number is wrong")
+    if num <= 1:
+        return 1
+    return num * factorial(num - 1)
+
+
+def operate(lst, i):
+    if finder.is_middle_operator(lst[i]):
+        return operate_middle(lst, i)
+    if finder.is_right_operator(lst[i]):
+        return operate_right(lst, i)
+
+
+def operate_middle(lst, i):
+    if not finder.is_operator(lst[i]):
+        raise Exception("not an operator")
+    if i == len(lst) - 1:
+        raise Exception("the operator " + str(lst[i]) + " is at the right edge of an expression")
+    if finder.is_minus(lst[i]):
+        if i == 0:
+            if not finder.is_number(lst[i + 1]):
+                raise Exception("the operator " + str(lst[i]) + " is not before a number")
+            else:
+                return get_result(0, float(lst[i + 1]), '-')
+    if i == 0:
+        raise Exception("the operator " + str(lst[i]) + " is at the left edge of an expression")
+
+    if finder.is_number(str(lst[i + 1])) and finder.is_number(str(lst[i - 1])):
+        return get_result(float(lst[i - 1]), float(lst[i + 1]), lst[i])
+    raise Exception("the operator " + str(lst[i]) + " is not in between two number")
+
+
+def operate_right(lst, i):
+    if not finder.is_operator(lst[i]):
+        raise Exception("not an operator")
+    if i == 0:
+        raise Exception("the operator " + str(lst[i]) + " is at the left edge of an expression")
+    if finder.is_number(lst[i - 1]):
+        return get_result(float(lst[i - 1]), None, lst[i])
+    raise Exception("the operator " + str(lst[i]) + " is not to the right of a number")
+
+
+def get_result(num1, num2, op):
+    # operators = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3, '~': 6, '%': 4, '!': 6, '@': 5, '$': 5, '&': 5, ')':99}
+    if op == '+':
+        return num1 + num2
+    elif op == '-':
+        return num1 - num2
+    elif op == '*':
+        return num1 * num2
+    elif op == '^':
+        return num1 ** num2
+    elif op == '@':
+        return (num1 + num2) / 2
+    elif op == '$':
+        return max(num1, num2)
+    elif op == '&':
+        return min(num1, num2)
+    elif op == '%':
+        return num1 % num2
+    elif op == '/':
+        return num1 / num2
+    elif op == '!':
+        return factorial(num1)
+    elif op == '~':
+        return -1 * num1
+    else:
+        return None
