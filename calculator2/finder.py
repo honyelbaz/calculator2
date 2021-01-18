@@ -120,6 +120,37 @@ def is_middle_operator(c):
 def is_right_operator(c):
     return kind_of_operator(c) == "right"
 
+
+#these functions gets a string which is the element of the list
+#and return True if it's one of them
+def is_number(s):
+    # s = str(s)
+    # start, finish = 0, 0
+    # if is_digit(s[0]):
+    #     start, finish = range_of_number(s, 0)
+    # else:
+    #     return False
+    # return finish == len(s) - 1
+    msg = ""
+    try:
+        float(s)
+    except Exception as e:
+        msg = e
+    return msg == ""
+
+
+def is_expression(s):
+    if is_number(s) or is_operator(s):
+        return False
+    return s[0] == '(' and s[len(s) - 1] == ')'
+
+
+def is_operator(s):
+    if len(s) > 1:
+        return False
+    return is_known_operator(s)
+
+
 # --------------------------------------------------------- ranges ----------
 # finding ranges of things in the string is important for manipulating it
 
@@ -213,7 +244,7 @@ def find_closer_for_opener(eq, i):
             unmatched_openers_count -= 1
 
         i += 1
-    raise Exception("closer bracket not found, something is wrong")
+    return -1
 
 
 # --------------------------------------------------------- list ----------
@@ -228,7 +259,7 @@ important to notice that this section is about a list and not about a string
 #gets a list
 #returns the index of the strongest operator if none found returns -1
 def find_strongest_operator(lst):
-    maxi = 0
+    maxi = -1
     maxs = 0
     for i in range(len(lst)):
         if is_known_operator(lst[i]):
@@ -236,3 +267,12 @@ def find_strongest_operator(lst):
                 maxi = i
                 maxs = strength_of_operator(lst[i])
     return maxi
+
+
+#
+#
+def find_expression(lst):
+    for i in range(len(lst)):
+        if is_expression(lst[i]):
+            return i
+    return -1
