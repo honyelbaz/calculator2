@@ -1,8 +1,12 @@
 # the known operators to the calculator
+left_operators = {'~': 6}
 
-operators = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3, '~': 6, '%': 4, '!': 6, '@': 5, '$': 5, '&': 5}
+middle_operators = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3, '%': 4, '@': 5,
+                    '$': 5, '&': 5}
+right_operators = {'!': 6}
 
-# --------------------------------------------------------- recognizers ----------
+# ----------------
+# ----------------------------------------- recognizers ----------
 # because in order to find stuff you need to recognize stuff :)
 
 """    numbers    """
@@ -23,7 +27,7 @@ def is_minus(c):
     return c == '-'
 
 
-#gets a char and returns True if the char is part of a streak with itself
+# gets a char and returns True if the char is part of a streak with itself
 def is_part_of_streak(eq, i):
     if len(eq) == 1:
         return False
@@ -34,7 +38,8 @@ def is_part_of_streak(eq, i):
     return eq[i] == eq[i - 1] or eq[i] == eq[i + 1]
 
 
-# a number that is not in the form of "e+" example: 5e+7 which is converted to 50000000
+# a number that is not in the form of "e+" example:
+# 5e+7 which is converted to 50000000
 def is_part_of_simple_number(c):
     # easy , if it's a digit or a dot
     if is_digit(c):
@@ -45,7 +50,8 @@ def is_part_of_simple_number(c):
 
 # gets a string and index and return is it a part of a number
 # if this string encounters a minus-
-# it assumes that all the duplicated minuses has been cut to one minus by another function
+# it assumes that all the duplicated minuses has been cut to one minus by
+# another function
 def is_part_of_number(eq, i):
     # if char a digit than it must be part of a number
     # if char is a dot then it must a part of a number
@@ -53,10 +59,12 @@ def is_part_of_number(eq, i):
     if is_part_of_simple_number(eq[i]):
         return True
 
-    #if the number is big enough and a float python will represent it in the format of {number1}e+{number2}
+    # if the number is big enough and a float python will represent it in the
+    # format of {number1}e+{number2}
     # which means {number1} * 10^{number2}
     if eq[i] == 'e':
-        # 'e' case -> if it's at the edge of the string that's a problem of course "{number1}e+{number2}"
+        # 'e' case -> if it's at the edge of the string that's a problem of
+        # course "{number1}e+{number2}"
         # i of 'e' is greater then 0 and less then len(eq) - 2 is good
         if i == 0 or i >= len(eq) - 2:
             return False
@@ -88,12 +96,19 @@ def is_part_of_number(eq, i):
 def strength_of_operator(c):
     if not is_known_operator(c):
         raise Exception("char is not a known operator")
-    return operators[c]
+    if is_left_operator(c):
+        return left_operators[c]
+    elif is_right_operator(c):
+        return right_operators[c]
+    elif is_middle_operator(c):
+        return middle_operators[c]
 
 
 # if it's in the dictionary of operators it is known
 def is_known_operator(c):
-    return c in operators
+    return c in right_operators \
+           or c in middle_operators \
+           or c in left_operators
 
 
 #
@@ -102,30 +117,60 @@ def kind_of_operator(c):
     if not is_known_operator(c):
         raise Exception("char is not a known operator")
 
-    #operators = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3, '~': 6, '%': 4, '!': 6, '@': 5, '$': 5, '&': 5}
+    # operators = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3, '~': 6, '%': 4,
+    # '!': 6, '@': 5, '$': 5, '&': 5}
 
-    if c == '+' or c == '-' or c == '*' or c == '/' or c == '^' or c == '%' or c == '@' or c == '$' or c == '&':
+    if c == '+' or c == '-' or c == '*' or c == '/' or c == '^' or c == '%' \
+            or c == '@' or c == '$' or c == '&':
         return "mid"
     elif c == '~' or c == '!':
         return "right"
-    #no no operator is "left" operator yet but still it needs to be respected
+    # no no operator is "left" operator yet but still it needs to be respected
     elif True:
         return "left"
 
 
 def is_middle_operator(c):
-    return kind_of_operator(c) == "mid"
+    return c in middle_operators
 
 
 def is_right_operator(c):
-    return kind_of_operator(c) == "right"
+    return c in right_operators
+
+
+def is_left_operator(c):
+    return c in left_operators
+
+
+# these functions gets a string which is the element of the list
+# and return True if it's one of them
+def is_number(s):
+    msg = ""
+    try:
+        float(s)
+    except Exception as e:
+        msg = e
+    return msg == ""
+
+
+def is_expression(s):
+    if is_number(s) or is_operator(s):
+        return False
+    return s[0] == '(' and s[len(s) - 1] == ')'
+
+
+def is_operator(s):
+    if len(s) > 1:
+        return False
+    return is_known_operator(s)
+
 
 # --------------------------------------------------------- ranges ----------
 # finding ranges of things in the string is important for manipulating it
 
 
-#gets an index of a minus and a string
-#returns the range of the streak of minuses
+# gets an index of a minus and a string
+# returns the range of the streak of minuses
 def range_of_minuses(eq, i):
     if eq[i] != '-':
         raise Exception("char is not a minus")
@@ -143,7 +188,8 @@ def range_of_minuses(eq, i):
     return start, finish
 
 
-# gets the string and index and return a tuple of the range of number (start, end)
+# gets the string and index and return a tuple of the range
+# of number (start, end)
 def range_of_number(eq, i):
     if not is_part_of_number(eq, i):
         raise Exception("the index is not in a number")
@@ -162,15 +208,17 @@ def range_of_number(eq, i):
 
     return start, finish
 
-# --------------------------------------------------------- find chars ----------
-#finding specific chars or kinds of chars
+
+# --------
+# ------------------------------------------------- find chars ----------
+# finding specific chars or kinds of chars
 
 
 """minus"""
 
 
-#gets a string
-#returns the first index it found of a '-' returns -1 if not found
+# gets a string
+# returns the first index it found of a '-' returns -1 if not found
 def find_minus(eq):
     for i in range(len(eq)):
         if is_minus(eq[i]):
@@ -178,7 +226,7 @@ def find_minus(eq):
     return -1
 
 
-#returns the index of a minus streak
+# returns the index of a minus streak
 def find_minus_that_is_part_of_streak(eq):
     for i in range(len(eq)):
         if is_minus(eq[i]) and is_part_of_streak(eq, i):
@@ -189,16 +237,17 @@ def find_minus_that_is_part_of_streak(eq):
 """bracket"""
 
 
-#gets a string and opener bracket index
-#returns the index of the matching closer bracket for it
+# gets a string and opener bracket index
+# returns the index of the matching closer bracket for it
 def find_closer_for_opener(eq, i):
     if eq[i] != '(':
         raise Exception("char not a opener bracket")
 
-    #finding the matching closer bracket is not so obvious
-    #its not he first closer bracket encountered but rather
-    #the first one encounter after all the openers have found their pair
-    #so every time we see an opener we add it to the unmatched openers and remove it when we find a match
+    # finding the matching closer bracket is not so obvious
+    # its not he first closer bracket encountered but rather
+    # the first one encounter after all the openers have found their pair
+    # so every time we see an opener we add it to the unmatched openers and
+    # remove it when we find a match
 
     unmatched_openers_count = 0
 
@@ -207,14 +256,17 @@ def find_closer_for_opener(eq, i):
         if eq[i] == '(':
             unmatched_openers_count += 1
         if eq[i] == ')':
-            #if the unmatched_openers_count is 1 it means that the closer bracket matching is found
+            # if the unmatched_openers_count is 1 it means that the closer
+            # bracket matching is found
             if unmatched_openers_count == 1:
                 return i
             unmatched_openers_count -= 1
 
         i += 1
-    raise Exception("closer bracket not found, something is wrong")
+    return -1
 
+
+"""operators"""
 
 # --------------------------------------------------------- list ----------
 """
@@ -225,14 +277,47 @@ important to notice that this section is about a list and not about a string
 """operators"""
 
 
-#gets a list
-#returns the index of the strongest operator if none found returns -1
+# gets a list
+# returns the index of the strongest operator if none found returns -1
 def find_strongest_operator(lst):
-    maxi = 0
+    maxi = -1
     maxs = 0
     for i in range(len(lst)):
         if is_known_operator(lst[i]):
             if strength_of_operator(lst[i]) > maxs:
                 maxi = i
                 maxs = strength_of_operator(lst[i])
+
+    if is_left_operator(lst[maxi]):
+        maxi = find_most_right_lefty(lst, maxi)
     return maxi
+
+
+#
+#
+def find_most_right_lefty(lst, i):
+    # in case of a left operator. if it's the strongest then the real strongest
+    # operator is the lefty operator which is most right
+    if not lst[i] in left_operators:
+        raise Exception("not a left operator")
+    original_operator = lst[i]
+
+    while i < len(lst) \
+            and (lst[i] in left_operators
+                 and strength_of_operator(original_operator)
+                 == strength_of_operator(lst[i])) \
+            or is_minus(lst[i]):
+        i += 1
+
+    while lst[i] != original_operator:
+        i -= 1
+    return i
+
+
+#
+#
+def find_expression(lst):
+    for i in range(len(lst)):
+        if is_expression(lst[i]):
+            return i
+    return -1
