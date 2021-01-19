@@ -1,18 +1,25 @@
-"""todo -
--handle the case of 23e+4e+3
+import solver
+import input_output as io
 
+# get input from user
+eq = io.get_equation()
+res = None
+# while input != "stop"
+while eq.lower() != "stop":
+    # solve the input
+    try:
+        res = solver.solve(eq)
+    except solver.Invalid as e:
+        pass    # the validity check function already prints the reason.
+                # no need to print "invalid" if the reason is printed
+    except Exception as e:
+        # print reason why it's unsolvable
+        print(e)
 
-"""
+    # if solved
+    if res is not None:
+        print(res)
+    res = None
 
-#get input from user
-
-#while input != "stop"
-
-    #solve the input
-
-    #if solved
-        #print the result
-    #if not solved
-        #print reason why it's unsolvable
-
-    #get input from user
+    # get input from user
+    eq = io.get_equation()
