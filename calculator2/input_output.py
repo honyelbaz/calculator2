@@ -1,14 +1,25 @@
-import re
+"""
 
-#function that asks the user for string input and returns it
+    :Written by: Hony Elbaz
+
+    this module serves needs of input_output
+"""
 
 
 def get_equation():
-    s = input()
-    s = re.sub('[\s\t]', '', s)
-    return s
+    """:returns an equation after all the white spaces are trimmed"""
+    equation = ""
+    #trt getting a string input from user
+    try:
+        equation = input()
+    except Exception:
+        print("input is morally wrong")
+    equation = trim_string(equation)
+    return equation
 
 
-#print the result
-def print_result(res):
-    print(res)
+def trim_string(equation):
+    """trims from the white spaces"""
+    return equation.replace(' ', '')\
+        .replace('\t', '')\
+        .replace('\n', '')

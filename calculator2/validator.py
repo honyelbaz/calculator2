@@ -1,16 +1,25 @@
 import finder
 
 
+#gets a string after the white characters has been cleared
+#returns True if it's valid two start solving else returns False and prints
+# reason why not valid
 def is_valid(eq):
     # not valid if...
     # no numbers or empty
-    # if the amount of left brackets is not equal to the amount of right brackets
+    # if the amount of left brackets is not equal to the amount of
+    # right brackets
     # if two dot are one after another or a dot is not in middle of a number
-    # a number can be presented like 45e+4 but it's invalid if the user gives 23e+32e+23
+    # a number can be presented like 45e+4 but it's invalid if the user
+    # gives 23e+32e+23
 
     msg = ""
     if len(eq) == 0:
         print("empty input. ")
+        return False
+
+    if len(eq) > 10000:
+        print("Don't you think the size of this equation is absurd?!")
         return False
 
     number_found = False
@@ -29,12 +38,13 @@ def is_valid(eq):
             right_bracket_counter += 1
         elif finder.is_dot(eq[i]):
             if not check_if_dot_in_suitable_place(eq, i):
-                msg += "dot not in suitable place. "
+                print("dot not in suitable place. ")
+                return False
         elif eq[i] == 'e':
             if not check_if_e_plus_in_suitable_place(eq, i):
                 msg += "the streak of e+ is not used correctly. "
         elif not finder.is_known_operator(eq[i]):
-            print("invalid character found. ")
+            print("invalid character found. \'" + str(eq[i]) + "\'")
             return False
         i += 1
 
