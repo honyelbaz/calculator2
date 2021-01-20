@@ -69,7 +69,7 @@ def is_part_of_streak(equation, index_of_char):
         return equation[index_of_char - 1] == equation[index_of_char]
 
     return equation[index_of_char] == equation[index_of_char - 1] \
-           or equation[index_of_char] == equation[index_of_char + 1]
+        or equation[index_of_char] == equation[index_of_char + 1]
 
 
 def is_part_of_simple_number(character):
@@ -324,7 +324,7 @@ def find_closer_for_opener(equation, index_of_opener_bracket):
         raise Exception("char not a opener bracket")
 
     # finding the matching closer bracket is not so obvious
-    # its not he first closer bracket encountered but rather
+    # its not the first closer bracket encountered but rather
     # the first one encounter after all the openers have found their pair
     # so every time we see an opener we add it to the unmatched openers and
     # remove it when we find a match
